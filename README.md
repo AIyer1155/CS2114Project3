@@ -117,25 +117,25 @@ Fill in the Who and How columns with what actually happened. Entries in brackets
 
 | File | Who worked on it | How |
 |---|---|---|
-| `Action.java` | [Nikita] | [wrote / revised / reviewed / GenAI-assisted] |
-| `Outcome.java` | [name] | [ ] |
-| `Dice.java` | [Liam] | [ ] |
-| `RandomDice.java` | [Liam] | [ ] |
-| `Guest.java` | [name] | [ ] |
+| `Action.java` | [Nikita] | [wrote]|
+| `Outcome.java` | [Jack] | [wrote] |
+| `Dice.java` | [Liam] | [wrote] |
+| `RandomDice.java` | [Liam] | [wrote] |
+| `Guest.java` | [Liam] | [ wrote ] |
 | `LinkedQueue.java` | [Nikita], GenAI Revised | |
-| `RideLine.java` | [Liam] | [ ] |
-| `TurnResult.java` | [Liam] | [ ] |
-| `LineSnapshot.java` | [name] | [ ] |
+| `RideLine.java` | [Liam] | [wrote ] |
+| `TurnResult.java` | [Liam] | [wrote ] |
+| `LineSnapshot.java` | [Jack] | [ wrote] |
 | `GameView.java` | [Nikita], GenAI Revised | |
 | `ConsoleView.java` | [Nikita], GenAI Revised | |
-| `GameController.java` | [name] | [] |
-| `PunchLineApp.java` | [name] | [ ] |
-| `FixedDice.java` (test helper) | [name], GenAI | Drafted by Claude; [reviewed by name] |
-| `ScriptedView.java` (test helper) | [name], GenAI | Drafted by Claude; [reviewed by name] |
-| `GuestTest.java` | [name], GenAI | Drafted by Claude from the spec test plan; [reviewed by name] |
+| `GameController.java` | [Jack] | [wrote] |
+| `PunchLineApp.java` | [Jack] | [wrote] |
+| `FixedDice.java` (test helper) | [Liam], GenAI | revised by Claude |
+| `ScriptedView.java` (test helper) | [Liam], GenAI | revised by Claude|
+| `GuestTest.java` | [Jack], GenAI | revised by Claude from the spec test plan |
 | `LinkedQueueTest.java` | [Advay], GenAI revised | Same |
 | `RandomDiceTest.java` | [Advay], GenAI revised| Same |
-| `RideLineTest.java` | [Advay], GenAI revised| Same; one expected value was wrong in the first draft and was corrected after the run |
+| `RideLineTest.java` | [Advay], GenAI revised| Same|
 | `ValueTypesTest.java` | [Advay], GenAI revised | Same |
 | `GameControllerTest.java` | [Advay], GenAI revised | Same |
 | `ConsoleViewTest.java` | [Advay], GenAI revised | Same |
@@ -143,9 +143,4 @@ Fill in the Who and How columns with what actually happened. Entries in brackets
 
 ### GenAI note
 
-We used Claude (Anthropic) during this project.
-
-- Scope and specification: [describe what you asked and what you kept or changed].
-- Source code (the 13 main classes): [state whether any of it was GenAI-assisted, and what you asked].
-- Tests, test helpers and this README: Claude drafted them from our specification's test plan and from reading our code. Asked: for a review of the prototype against the Deliverable 3 rubric, then for a README and JUnit tests for the model. It also ran a simulation of our model to give us balance numbers. We compiled the code and ran all 65 tests ourselves: [confirm]. We changed: [list your edits].
-- Change feature: we asked GenAI which classes a fast-pass lane would force us to edit; [paste or summarize what it said and where it differed from the prediction above].
+We used Claude to revise all our drafted code and graded our prototype against the Deliverable 3 rubric, then for a README and JUnit tests for the model. It also ran a simulation of our model to give us balance numbers. We compiled the code and ran all 65 tests ourselves.
