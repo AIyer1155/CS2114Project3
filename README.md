@@ -122,12 +122,12 @@ Fill in the Who and How columns with what actually happened. Entries in brackets
 | `Dice.java` | [Liam] | [ ] |
 | `RandomDice.java` | [Liam] | [ ] |
 | `Guest.java` | [name] | [ ] |
-| `LinkedQueue.java` | [Nikita] | [GenAI Revised] |
+| `LinkedQueue.java` | [Nikita], GenAI Revised | |
 | `RideLine.java` | [Liam] | [ ] |
 | `TurnResult.java` | [Liam] | [ ] |
 | `LineSnapshot.java` | [name] | [ ] |
-| `GameView.java` | [Nikita] | [GenAI Revised] |
-| `ConsoleView.java` | [Nikita] | [GenAI Revised] |
+| `GameView.java` | [Nikita], GenAI Revised | |
+| `ConsoleView.java` | [Nikita], GenAI Revised | |
 | `GameController.java` | [name] | [] |
 | `PunchLineApp.java` | [name] | [ ] |
 | `FixedDice.java` (test helper) | [name], GenAI | Drafted by Claude; [reviewed by name] |
