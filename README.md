@@ -117,18 +117,18 @@ Fill in the Who and How columns with what actually happened. Entries in brackets
 
 | File | Who worked on it | How |
 |---|---|---|
-| `Action.java` | [name] | [wrote / revised / reviewed / GenAI-assisted] |
+| `Action.java` | [Nikita] | [wrote / revised / reviewed / GenAI-assisted] |
 | `Outcome.java` | [name] | [ ] |
 | `Dice.java` | [Liam] | [ ] |
 | `RandomDice.java` | [Liam] | [ ] |
 | `Guest.java` | [name] | [ ] |
-| `LinkedQueue.java` | [name] | [ ] |
+| `LinkedQueue.java` | [Nikita] | [GenAI Revised] |
 | `RideLine.java` | [Liam] | [ ] |
 | `TurnResult.java` | [Liam] | [ ] |
 | `LineSnapshot.java` | [name] | [ ] |
-| `GameView.java` | [name] | [ ] |
-| `ConsoleView.java` | [name] | [ ] |
-| `GameController.java` | [name] | [ ] |
+| `GameView.java` | [Nikita] | [GenAI Revised] |
+| `ConsoleView.java` | [Nikita] | [GenAI Revised] |
+| `GameController.java` | [name] | [] |
 | `PunchLineApp.java` | [name] | [ ] |
 | `FixedDice.java` (test helper) | [name], GenAI | Drafted by Claude; [reviewed by name] |
 | `ScriptedView.java` (test helper) | [name], GenAI | Drafted by Claude; [reviewed by name] |
