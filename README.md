@@ -119,12 +119,12 @@ Fill in the Who and How columns with what actually happened. Entries in brackets
 |---|---|---|
 | `Action.java` | [name] | [wrote / revised / reviewed / GenAI-assisted] |
 | `Outcome.java` | [name] | [ ] |
-| `Dice.java` | [name] | [ ] |
-| `RandomDice.java` | [name] | [ ] |
+| `Dice.java` | [Liam] | [ ] |
+| `RandomDice.java` | [Liam] | [ ] |
 | `Guest.java` | [name] | [ ] |
 | `LinkedQueue.java` | [name] | [ ] |
-| `RideLine.java` | [name] | [ ] |
-| `TurnResult.java` | [name] | [ ] |
+| `RideLine.java` | [Liam] | [ ] |
+| `TurnResult.java` | [Liam] | [ ] |
 | `LineSnapshot.java` | [name] | [ ] |
 | `GameView.java` | [name] | [ ] |
 | `ConsoleView.java` | [name] | [ ] |
