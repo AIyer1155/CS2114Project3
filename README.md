@@ -133,13 +133,13 @@ Fill in the Who and How columns with what actually happened. Entries in brackets
 | `FixedDice.java` (test helper) | [name], GenAI | Drafted by Claude; [reviewed by name] |
 | `ScriptedView.java` (test helper) | [name], GenAI | Drafted by Claude; [reviewed by name] |
 | `GuestTest.java` | [name], GenAI | Drafted by Claude from the spec test plan; [reviewed by name] |
-| `LinkedQueueTest.java` | [Advay], GenAI | Same |
-| `RandomDiceTest.java` | [Advay], GenAI | Same |
-| `RideLineTest.java` | [Advay], GenAI | Same; one expected value was wrong in the first draft and was corrected after the run |
-| `ValueTypesTest.java` | [Advay], GenAI | Same |
-| `GameControllerTest.java` | [Advay], GenAI | Same |
-| `ConsoleViewTest.java` | [Advay], GenAI | Same |
-| `README.md` | [name], GenAI | Drafted by Claude; [edited by name] |
+| `LinkedQueueTest.java` | [Advay], GenAI revised | Same |
+| `RandomDiceTest.java` | [Advay], GenAI revised| Same |
+| `RideLineTest.java` | [Advay], GenAI revised| Same; one expected value was wrong in the first draft and was corrected after the run |
+| `ValueTypesTest.java` | [Advay], GenAI revised | Same |
+| `GameControllerTest.java` | [Advay], GenAI revised | Same |
+| `ConsoleViewTest.java` | [Advay], GenAI revised | Same |
+| `README.md` | [Jack], Gen AI revised |
 
 ### GenAI note
 
