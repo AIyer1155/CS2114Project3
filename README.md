@@ -2,7 +2,7 @@
 
 A single-player terminal game. You start at the back of a line of about 15 guests. Each turn you either WAIT or PUNCH the guest ahead of you. A punch wins with a probability that falls linearly from 70% (back of the line) to 10% (second place). A win swaps you one place forward; a loss sends you to the back. The front guest boards every turn, and the game ends when you board.
 
-Team: Jack, Liam, Nikita, Advay.
+Team: Jack, Liam, Nikita, and Advay.
 
 ## How to run
 
