@@ -56,16 +56,9 @@ public class RideLine {
         this.standardLane = new LinkedQueue<>();
         this.fastLane = new LinkedQueue<>();
 
-        // Distribute guests between standard and fast lanes (roughly 70/30)
-        int fastLaneCount = (int) (lineSize * 0.3);
-        int standardLaneCount = lineSize - fastLaneCount - 1;
-
-        for (int i = 1; i <= standardLaneCount; i++) {
+        // All guests start in standard lane; fast lane is only used when FAST_PASS is activated
+        for (int i = 1; i < lineSize; i++) {
             this.standardLane.enqueue(new Guest("Guest " + i, false));
-        }
-
-        for (int i = standardLaneCount + 1; i <= standardLaneCount + fastLaneCount; i++) {
-            this.fastLane.enqueue(new Guest("Guest " + i, false));
         }
 
         this.player = new Guest(playerName, true);
@@ -115,7 +108,7 @@ public class RideLine {
 
         int pos = playerPosition();
         boolean canPunch = pos > 1 && !playerBoarded;
-        boolean canUseFastPass = !fastPassUsed && !playerBoarded && !playerInFastLane;
+        boolean canUseFastPass = !fastPassUsed && !playerBoarded && !playerInFastLane && pos > 1;
 
         return new LineSnapshot(standardNames, fastNames, pos, standardLane.size(), fastLane.size(),
                                 punchOdds(), canPunch, canUseFastPass, turn, punchesWon, punchesLost);
@@ -210,7 +203,7 @@ public class RideLine {
             }
         }
 
-        // Board next guest (every third from fast lane, rest from standard)
+        // Board next guest from standard lane (every third turn, board from fast lane instead)
         Guest boarded = null;
         boardingCycle++;
         if (boardingCycle % 3 == 0 && !fastLane.isEmpty()) {

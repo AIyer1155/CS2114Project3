@@ -87,7 +87,7 @@ public class GameControllerTest {
         RideLine model = new RideLine(3, "You", new FixedDice(true));
         ScriptedView view = new ScriptedView("punhc", "wait", "wait", "wait");
         controller(model, view).run();
-        assertEquals(Arrays.asList("Type wait or punch."), view.getMessages());
+        assertEquals(Arrays.asList("Type wait, punch, or fastpass."), view.getMessages());
         assertEquals(3, model.snapshot().getTurn());
         assertEquals(1, view.getSummaries());
         assertTrue(view.wasLastFinished());
