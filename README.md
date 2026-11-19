@@ -108,7 +108,7 @@ No. The model (RideLine) maintains the queues and routing. The view (ConsoleView
 | `TurnResult.java` | Liam | Wrote (from D3) |
 | `LineSnapshot.java` | Advay, Jack | Extended with fast-lane fields; backward-compatible constructor |
 | `GameView.java` | Nikita | Wrote (from D3); GenAI reviewed |
-| `ConsoleView.java` | Nikita, Advay | Updated to show both lanes and fast-pass option |
+| `ConsoleView.java` | Nikita, Advay, Liam | Updated to show both lanes and fast-pass option |
 | `GameController.java` | Liam, Advay | Updated parseAction and validation for fast-pass |
 | `PunchLineApp.java` | Jack | Wrote (from D3) |
 | `FixedDice.java` (test helper) | Liam | Wrote (from D3); GenAI revised |
