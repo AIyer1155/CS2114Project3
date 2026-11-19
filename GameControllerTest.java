@@ -16,13 +16,20 @@ public class GameControllerTest {
     }
 
     @Test
+    public void parseActionAcceptsFastpassInAnyCase() {
+        assertEquals(Action.FAST_PASS, GameController.parseAction("fastpass"));
+        assertEquals(Action.FAST_PASS, GameController.parseAction("FASTPASS"));
+        assertEquals(Action.FAST_PASS, GameController.parseAction("  FaStPaSs \t"));
+    }
+
+    @Test
     public void parseActionRejectsEverythingElse() {
-        for (String bad : new String[] {null, "", "   ", "punhc", "w", "wait wait", "1", "quit"}) {
+        for (String bad : new String[] {null, "", "   ", "punhc", "w", "wait wait", "1", "quit", "fast pass", "fastpas"}) {
             try {
                 GameController.parseAction(bad);
                 fail("should reject: " + bad);
             } catch (IllegalArgumentException expected) {
-                assertEquals("Type wait or punch.", expected.getMessage());
+                assertEquals("Type wait, punch, or fastpass.", expected.getMessage());
             }
         }
     }
@@ -124,5 +131,37 @@ public class GameControllerTest {
         ScriptedView view = new ScriptedView("punch", "wait", "wait");
         controller(model, view).run();
         assertEquals(Outcome.PUNCH_WON, view.getResults().get(0).getOutcome());
+    }
+
+    // ---- FAST PASS ----
+
+    @Test
+    public void fastPassIsAcceptedByParseAction() {
+        assertEquals(Action.FAST_PASS, GameController.parseAction("fastpass"));
+    }
+
+    @Test
+    public void fastPassCanBeUsedInGame() {
+        RideLine model = new RideLine(10, "You", new FixedDice(true));
+        ScriptedView view = new ScriptedView("fastpass", "wait", "wait", "wait", "wait", "wait");
+        controller(model, view).run();
+        assertEquals(Outcome.FAST_PASSED, view.getResults().get(0).getOutcome());
+    }
+
+    @Test
+    public void fastPassIsRefusedAfterFirstUse() {
+        RideLine model = new RideLine(10, "You", new FixedDice(true));
+        ScriptedView view = new ScriptedView("fastpass", "fastpass", "wait", "wait", "wait");
+        controller(model, view).run();
+        assertEquals(Arrays.asList("Fast pass already used or not available."), view.getMessages());
+    }
+
+    @Test
+    public void fastPassAndThenPunch() {
+        RideLine model = new RideLine(10, "You", new FixedDice(true, true));
+        ScriptedView view = new ScriptedView("fastpass", "punch", "wait", "wait", "wait");
+        controller(model, view).run();
+        assertEquals(Outcome.FAST_PASSED, view.getResults().get(0).getOutcome());
+        assertEquals(Outcome.PUNCH_WON, view.getResults().get(1).getOutcome());
     }
 }

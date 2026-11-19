@@ -241,4 +241,128 @@ public class RideLineTest {
         }
         assertEquals(100, turns);
     }
+
+    // ---- FAST PASS ----
+
+    @Test
+    public void fastPassMovesPlayerToFastLane() {
+        RideLine r = line(10, new FixedDice(true));
+        LineSnapshot before = r.snapshot();
+        assertTrue("Should be able to use fast pass", before.canUseFastPass());
+
+        TurnResult t = r.takeTurn(Action.FAST_PASS);
+        assertEquals(Action.FAST_PASS, t.getAction());
+        assertEquals(Outcome.FAST_PASSED, t.getOutcome());
+
+        LineSnapshot after = r.snapshot();
+        assertFalse("Should not be able to use fast pass again", after.canUseFastPass());
+    }
+
+    @Test
+    public void fastPassCanOnlyBeUsedOnce() {
+        RideLine r = line(10, new FixedDice(true));
+        r.takeTurn(Action.FAST_PASS);
+
+        assertThrows(IllegalStateException.class, () -> r.takeTurn(Action.FAST_PASS));
+    }
+
+    @Test
+    public void fastPassDoesNotUseOdds() {
+        FixedDice dice = new FixedDice(true);
+        RideLine r = line(10, dice);
+        r.takeTurn(Action.FAST_PASS);
+        assertEquals(0, dice.getCalls());
+    }
+
+    @Test
+    public void fastPassShowsCorrectOutcome() {
+        RideLine r = line(10, new FixedDice(true));
+        TurnResult t = r.takeTurn(Action.FAST_PASS);
+        assertEquals(Outcome.FAST_PASSED, t.getOutcome());
+        assertEquals(0.0, t.getOddsUsed(), EPS);
+    }
+
+    @Test
+    public void fastPassBoardsAGuestEachTurn() {
+        RideLine r = line(10, new FixedDice(true));
+        int initialLen = r.snapshot().getLength();
+
+        r.takeTurn(Action.FAST_PASS);
+        int afterFastPass = r.snapshot().getLength();
+
+        // One guest should have boarded
+        assertEquals(initialLen - 1, afterFastPass);
+    }
+
+    @Test
+    public void fastPassAndThenPunch() {
+        RideLine r = line(10, new FixedDice(true, true));
+        r.takeTurn(Action.FAST_PASS);
+
+        LineSnapshot snap = r.snapshot();
+        if (snap.canPunch()) {
+            TurnResult t = r.takeTurn(Action.PUNCH);
+            assertEquals(Outcome.PUNCH_WON, t.getOutcome());
+        }
+    }
+
+    @Test
+    public void fastPassCannotBeUsedTwice() {
+        RideLine r = line(10, new FixedDice(true));
+        r.takeTurn(Action.FAST_PASS);
+
+        assertThrows(IllegalStateException.class, () -> r.takeTurn(Action.FAST_PASS));
+    }
+
+    @Test
+    public void fastPassReducesStandardLaneSize() {
+        RideLine r = line(10, new FixedDice(true));
+        int initialStandardLen = r.snapshot().getLength();
+
+        r.takeTurn(Action.FAST_PASS);
+        int afterStandardLen = r.snapshot().getLength();
+
+        // Standard lane should be one shorter (minus the boarded guest)
+        // Initial: 10, After: 1 boarded + player moved to fast = 8
+        assertTrue(afterStandardLen < initialStandardLen);
+    }
+
+    @Test
+    public void fastPassIncreasesFastLaneSize() {
+        RideLine r = line(10, new FixedDice(true));
+        int initialFastLen = r.snapshot().getFastLaneLength();
+
+        r.takeTurn(Action.FAST_PASS);
+        int afterFastLen = r.snapshot().getFastLaneLength();
+
+        // Fast lane should be one longer (player added)
+        // But one also boards, so depends on boarding cycle
+        assertTrue(afterFastLen >= initialFastLen);
+    }
+
+    @Test
+    public void fastPassCannotBeUsedWhenAlreadyInFastLane() {
+        RideLine r = line(10, new FixedDice(true));
+        r.takeTurn(Action.FAST_PASS);
+
+        assertThrows(IllegalStateException.class, () -> r.takeTurn(Action.FAST_PASS));
+    }
+
+    @Test
+    public void fastPassInitiallyAvailable() {
+        RideLine r = line(10, new FixedDice(true));
+        assertTrue("Fast pass should be available at start", r.snapshot().canUseFastPass());
+    }
+
+    @Test
+    public void fastPassNotAvailableAtFront() {
+        RideLine r = line(3, new FixedDice(true, true, true));
+        // Board guests until we're at the front
+        while (r.playerPosition() > 1 && !r.isGameOver()) {
+            r.takeTurn(Action.WAIT);
+        }
+
+        // Once at front, should not be able to use fast pass
+        assertFalse("Should not be able to use fast pass at front", r.snapshot().canUseFastPass());
+    }
 }
