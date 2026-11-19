@@ -15,7 +15,7 @@ public class GameController {
 
     public static Action parseAction(String raw) {
         if (raw == null || raw.length() >= GameView.MAX_LINE_READ) {
-            throw new IllegalArgumentException("Type wait or punch.");
+            throw new IllegalArgumentException("Type wait, punch, or fastpass.");
         }
         String trimmed = raw.trim();
         if (trimmed.equalsIgnoreCase("wait")) {
@@ -24,7 +24,10 @@ public class GameController {
         if (trimmed.equalsIgnoreCase("punch")) {
             return Action.PUNCH;
         }
-        throw new IllegalArgumentException("Type wait or punch.");
+        if (trimmed.equalsIgnoreCase("fastpass")) {
+            return Action.FAST_PASS;
+        }
+        throw new IllegalArgumentException("Type wait, punch, or fastpass.");
     }
 
     public static int parseLineSize(String arg) {
@@ -61,6 +64,8 @@ public class GameController {
                     Action action = parseAction(rawInput);
                     if (action == Action.PUNCH && !current.canPunch()) {
                         view.showMessage("You're at the front, just wait.");
+                    } else if (action == Action.FAST_PASS && !current.canUseFastPass()) {
+                        view.showMessage("Fast pass already used or not available.");
                     } else {
                         validAction = action;
                     }

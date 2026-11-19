@@ -1,4 +1,5 @@
 public enum Action {
     WAIT,
-    PUNCH
+    PUNCH,
+    FAST_PASS
 }

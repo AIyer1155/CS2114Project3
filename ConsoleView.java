@@ -37,18 +37,27 @@ public class ConsoleView implements GameView {
             throw new NullPointerException("Snapshot cannot be null");
         }
         out.println("-----------------------------------------");
-        out.printf("Turn %d | Line Length: %d%n", snapshot.getTurn(), snapshot.getLength());
-        out.println("Line: " + String.join(", ", snapshot.getNames()));
+        out.printf("Turn %d | Standard Lane: %d | Fast Lane: %d%n", snapshot.getTurn(), snapshot.getLength(), snapshot.getFastLaneLength());
+        out.println("Standard Lane: " + String.join(", ", snapshot.getNames()));
+        if (snapshot.getFastLaneLength() > 0) {
+            out.println("Fast Lane: " + String.join(", ", snapshot.getFastLaneNames()));
+        }
         if (snapshot.getPlayerPosition() > 0) {
-            out.printf("Your position: %d of %d%n", snapshot.getPlayerPosition(), snapshot.getLength());
+            out.printf("Your position: %d%n", snapshot.getPlayerPosition());
         }
+
+        StringBuilder actions = new StringBuilder();
+        actions.append("Choose action (wait");
         if (snapshot.canPunch()) {
+            actions.append(" / punch");
             out.printf("Punch success odds: %.1f%%%n", snapshot.getPunchOdds() * 100.0);
-            out.print("Choose action (wait / punch): ");
-        } else {
-            out.println("You are at the front of the line!");
-            out.print("Choose action (wait): ");
         }
+        if (snapshot.canUseFastPass()) {
+            actions.append(" / fastpass");
+        }
+        actions.append("): ");
+
+        out.print(actions.toString());
         out.flush();
     }
 
@@ -60,9 +69,11 @@ public class ConsoleView implements GameView {
         out.println();
         if (result.getAction() == Action.WAIT) {
             out.println("You waited patiently.");
+        } else if (result.getAction() == Action.FAST_PASS) {
+            out.println("You used your fast pass! You moved to the fast lane!");
         } else if (result.getOutcome() == Outcome.PUNCH_WON) {
             out.printf("PUNCH SUCCESS! (odds were %.1f%%) You cut ahead one spot!%n", result.getOddsUsed() * 100.0);
-        } else {
+        } else if (result.getOutcome() == Outcome.PUNCH_LOST) {
             out.printf("PUNCH FAILED! (odds were %.1f%%) You got sent to the back of the line!%n", result.getOddsUsed() * 100.0);
         }
         out.printf("Guest '%s' boarded the ride.%n", result.getBoardedName());
