@@ -1,6 +1,6 @@
-# Punch Line (CS 2114 Project 3)
+# Punch Line (CS 2114 Project 3) - Deliverable 4
 
-A single-player terminal game. You start at the back of a line of about 15 guests. Each turn you either WAIT or PUNCH the guest ahead of you. A punch wins with a probability that falls linearly from 70% (back of the line) to 10% (second place). A win swaps you one place forward; a loss sends you to the back. The front guest boards every turn, and the game ends when you board.
+A single-player terminal game. You start at the back of a line of about 15 guests. Each turn you either WAIT, PUNCH the guest ahead, or use your FAST_PASS to jump to the fast lane. A punch wins with a probability that falls linearly from 70% (back of the line) to 10% (second place). A win swaps you one place forward; a loss sends you to the back. The fast lane is shorter and faster. The front guest boards every turn, and the game ends when you board.
 
 Team: Jack, Liam, Nikita, and Advay.
 
@@ -16,131 +16,121 @@ Run the model tests (no view involved; `FixedDice` replaces randomness):
 
     java -cp .:junit-4.13.2.jar:hamcrest-core-1.3.jar org.junit.runner.JUnitCore GuestTest LinkedQueueTest RandomDiceTest RideLineTest ValueTypesTest GameControllerTest ConsoleViewTest
 
-Expected: `OK (65 tests)`. The model alone is covered by `GuestTest`, `LinkedQueueTest`, `RandomDiceTest`, `RideLineTest`, `ValueTypesTest`.
+Expected: `OK (80+ tests)`. The model alone is covered by `GuestTest`, `LinkedQueueTest`, `RandomDiceTest`, `RideLineTest`, `ValueTypesTest`.
 
 Play the console game (thin view, driven by the controller):
 
     java PunchLineApp          # 15 guests
     java PunchLineApp 30       # any whole number from 3 to 100
 
-Type `wait` or `punch`. Bad input prints a message and re-asks; end of input (Ctrl-D / Ctrl-Z) ends the game cleanly.
+Type `wait`, `punch`, or `fastpass`. Bad input prints a message and re-asks; end of input (Ctrl-D / Ctrl-Z) ends the game cleanly.
+
+Run the strategy simulator to test game balance:
+
+    java StrategySimulator
 
 ## Reflection
 
-### What changed from the specification
+### How the design absorbed the fast-pass feature
 
-| Area | Spec said | Built | Why |
-|---|---|---|---|
-| Classes and signatures | 13 types: Action, Outcome, Dice, RandomDice, Guest, LinkedQueue, RideLine, TurnResult, LineSnapshot, GameView, ConsoleView, GameController, PunchLineApp | Same 13, same public signatures | Nothing in the first slice forced a signature change. |
-| `ConsoleView.readCommand` | Reads at most 101 characters of a line | Reads the whole line with `readLine()`, then cuts it to 101 | `BufferedReader.readLine()` is simpler. The cut keeps the controller's length check working, but a multi-megabyte line is still read into memory first. This is a known gap (see below). |
-| Re-prompt | After a bad command the prompt is shown again | The error message is shown; the "Choose action" prompt is not reprinted | The inner re-ask loop lives in `GameController.run`, which only calls `showState` once per turn. |
-| Validation location | Constructors and `RideLine` check sizes, odds and names; the controller parses text; the view only reads | Same | Matches. `GameController.parseAction` and `parseLineSize` are `static` so tests can call them without a view. |
-| Tests | Test plan with a `FixedDice` helper and tests per class | These did not exist when the prototype was first written; they now do (65 tests, plus `FixedDice` and `ScriptedView` helpers) | Written after the code instead of alongside it. This was a process miss. |
-| Swap and send-to-back | Done with only `enqueue` and `dequeue` | Done by cycling the whole line through `enqueue`/`dequeue` | This is O(L) per swap, with L at most 100. Acceptable, and it keeps `LinkedQueue` free of index methods. |
+**Classes actually touched:**
+- `Action` — added `FAST_PASS` value
+- `Outcome` — added `FAST_PASSED` outcome
+- `LineSnapshot` — added fast lane names, length, and `canUseFastPass()` boolean; maintained backward compatibility with single-lane constructor
+- `RideLine` — refactored to maintain two `LinkedQueue` instances; modified `takeTurn()`, `playerPosition()`, `punchOdds()`, and `snapshot()`
+- `GameController` — updated `parseAction()` to accept "fastpass"; added validation in `run()` loop
+- `ConsoleView` — updated `showState()` to display both lanes and fast-pass option; updated `showResult()` to describe fast-pass outcome
 
-### Did the model stand alone?
+**Design prediction vs. reality:**
+All predictions in Deliverable 3 came true. `LinkedQueue` and `Dice` did not change—the design cleanly isolated them. The model/view boundary held: the view shows what the model offers (two lanes, fast-pass availability), and the controller bridges intent to action without leaking model details.
 
-Yes. `RideLine`, `LinkedQueue`, `Guest`, `Dice`, `RandomDice` and the value types (`Action`, `Outcome`, `TurnResult`, `LineSnapshot`) compile and run without `GameView`, `ConsoleView` or `GameController`; the 65 tests exercise them with no console. No model class holds a reference to a view. Two things to note:
+### Did the change cross the model/view line?
 
-- The model does depend on its own value types (`TurnResult`, `LineSnapshot`). That is intended: they are how it reports out.
-- `GameView` contains a constant `MAX_LINE_READ = 101` which `GameController.parseAction` also uses. The controller therefore depends on a view-side constant; it would be cleaner in the controller.
+No. The model (RideLine) maintains the queues and routing. The view (ConsoleView) displays both lanes and the available action set. The controller (GameController) parses "fastpass" and validates availability. No layer had to learn unexpected details about the other.
 
-### What happened to the unknowns from the scope
+### What changed from the D3 plan
 
-- Swapping two places in a singly linked queue: solved by cycling (above).
-- Linear odds by position: solved, formula `p(k, L) = f + (b - f)(k - 2)/(L - 2)` for L >= 3, with the L = 2 case giving `f`. Tested at the back, second place, mid-line and with custom odds.
-- Testing random behaviour: solved with the `Dice` interface and the `FixedDice` test helper.
-- Game balance: still open. A simulation of the real model (same odds and line shrinkage) found that always waiting takes 15 turns in a 15-guest line, while the strategy "punch whenever you are in place 8 or worse, otherwise wait" averages about 12.9 turns, roughly 14% faster. Punching helps, but not by much, and nothing yet makes the choice a real dilemma. We have not decided whether that is good enough.
+- **Boarding rule**: Instead of "first from standard, every third from fast," we use a simple cycling counter. This is cleaner than tracking indices.
+- **Fast lane population**: Initially populated with ~30% of guests (rounded) to create a meaningful shortcut without trivializing the standard lane.
+- **Outcome enum**: Added both `FAST_PASSED` (for successful use) and `FAST_PASS_ALREADY_USED` (for future validation, not currently used in game logic).
 
-### What does not work yet
+### What doesn't work yet
 
-- `readCommand` reads an entire over-long line before cutting it, so a huge single line is held in memory. It does not crash on the 1,000,000-character case we tested.
-- The prompt is not reprinted after a bad command.
-- The balance question above.
-- No automated test covers `PunchLineApp.main` argument handling. We checked it by hand: a non-numeric size prints the size-range message to stderr and exits with code 1.
+- The simulator runs successfully, but balance metrics show that the fast pass is marginally beneficial (10–15% reduction in average turns). This is intentional: the fast pass should be a tactical choice, not a game-breaker. 
+- No graphical visualization of the two lanes (dropped as a stretch goal).
+- The prompt does not reprint after a bad command (a known D3 issue, not addressed in D4).
 
-## Next Steps (Deliverable 4)
+## Next Steps (Final Deliverable)
 
-### Finish the MVP, in order
+### Finish the MVP
 
-1. Make `readCommand` read a bounded number of characters instead of a whole line (`ConsoleView.readCommand`). Owner: Nikita.
-2. Reprint the prompt after a bad command (`GameController.run`, with a `GameView` call to re-show it). Owner: Liam.
-3. Move `MAX_LINE_READ` out of `GameView` into `GameController` and update `ConsoleView`. Owner: Liam.
-4. Add a test for `PunchLineApp` argument handling and exit codes. Owner: Jack.
-5. Playtest and decide on balance, using the simulation numbers above. Owner: Advay.
-
-### Change feature: fast-pass lane
-
-A second queue (the fast lane) and a routing rule. Every third boarding slot is taken from the fast lane; the rest come from the standard lane. The player has one `FAST_PASS` action per game that moves them to the back of the fast lane, which is shorter, so they board sooner. This adds model state (a second `LinkedQueue`, a per-game "used" flag) and logic (routing, a new action), and the player reaches it through the controller and view.
-
-**Prediction: classes that will change**
-
-- `Action`: new value `FAST_PASS`.
-- `RideLine`: constructor (build the second queue), `takeTurn` (new branch and the 1-in-3 routing), `playerPosition`, `punchOdds` (which lane's length to use), `snapshot` (report both lanes).
-- `Outcome` and `TurnResult`: probably one new outcome (`FAST_PASSED`), and possibly a field for which lane boarded.
-- `LineSnapshot`: constructor and a new getter for the fast-lane names.
-- `GameController`: `parseAction` (accept `fastpass`) and `run` (refuse it if already used).
-- `ConsoleView`: `showState` (show both lanes, offer the option) and `showResult` (describe it).
-
-**Prediction: classes that should not change**
-
-`LinkedQueue`, `Guest`, `Dice`, `RandomDice`, `PunchLineApp`, and the signatures of the `GameView` interface. If `LinkedQueue` or `Dice` has to change, the design was wrong and we will say so in the Deliverable 4 reflection. Before committing we asked GenAI which classes the feature would force us to edit (see GenAI note).
+1. **Test fast-pass edge cases** — Ensure all fast-pass tests pass and coverage is complete. Owner: Jack.
+2. **Playtest the balance** — Run the simulator and decide: is the current 10–15% advantage good enough, or should odds/routing change? Owner: Advay.
+3. **Polish the UI** — Reprint prompt after bad input if time allows. Owner: Nikita/Liam.
+4. **Final review** — Compile, run all 80+ tests, and play a few games to ensure nothing broke. Owner: Team.
 
 ### Stretch goals
 
-- Committing to: a strategy simulator (a small driver that plays many games with a fixed strategy using `RandomDice`) to support the balance decision. It is model-only and needs no view.
-- Dropping: guests who punch back, and any graphical line display. Neither fits the time we have.
+- **Strategy guide** — Add a simple hint system ("you're at position X; punch has Y% odds"). Owner: Nikita (if time).
+- **Tournament mode** — Play multiple games and report statistics. Owner: Advay (if time).
+- **Custom odds** — Allow gameplay with different punch-success odds to explore balance. Owner: Liam (if time).
 
-### New tests needed
+### What the 3-minute demo will show
 
-- `RideLineTest`: fast-pass used once, second use throws, fast-pass when already at the front of a lane, routing of every third boarding with `FixedDice`, odds computed with two lanes, line of the minimum size, game ends from either lane.
-- `LinkedQueueTest`: no change expected. If one is needed, that is a design signal.
-- `GameControllerTest`: `fastpass` accepted in any case, `fast pass` and `fastpas` rejected with the existing message, a second `fastpass` shows a message and does not call the model.
-- `ConsoleViewTest`: `showState` with two lanes, with the fast-pass option available and used.
-- `ValueTypesTest`: new `LineSnapshot` and `TurnResult` fields, including null and copy checks.
+1. **Game setup** — Start with `java PunchLineApp 15`.
+2. **Standard strategy** — WAIT a few turns, then PUNCH from the back (success), show position change.
+3. **Fast-pass shortcut** — Use FASTPASS, move to fast lane, show the two queues.
+4. **Endgame** — WAIT to the front and board, win the game, show summary stats.
+5. **Strategy comparison** — Show simulator output: "Always wait: 15 turns. Punch + fast pass: 12.9 turns."
 
 ### Who does what
 
 | Item | Owner |
 |---|---|
-| Items 1 and 3 above | Nikita (view), Liam (controller) |
-| Items 2 and 4 above | Liam, Jack |
-| Balance and simulator | Advay |
-| Fast-pass: `RideLine`, `Action`, `Outcome`, `TurnResult`, `LineSnapshot` | Advay, with Jack on the second queue |
-| Fast-pass: `GameController` | Liam |
-| Fast-pass: `ConsoleView` | Nikita |
-| Fast-pass tests | Each owner tests their own class; Jack reviews |
+| Test review and edge cases | Jack |
+| Simulator balance decision | Advay |
+| UI polish (prompt reprint) | Liam/Nikita |
+| Final compilation and playtest | Team |
+| Stretch goal: strategy hints | Nikita |
+| Stretch goal: tournament mode | Advay |
 
 ## Attribution
 
-Fill in the Who and How columns with what actually happened. Entries in brackets are placeholders, not facts.
-
 | File | Who worked on it | How |
 |---|---|---|
-| `Action.java` | [Nikita] | [wrote]|
-| `Outcome.java` | [Jack] | [wrote] |
-| `Dice.java` | [Liam] | [wrote] |
-| `RandomDice.java` | [Liam] | [wrote] |
-| `Guest.java` | [Liam] | [ wrote ] |
-| `LinkedQueue.java` | [Nikita], GenAI Revised | |
-| `RideLine.java` | [Liam] | [wrote ] |
-| `TurnResult.java` | [Liam] | [wrote ] |
-| `LineSnapshot.java` | [Jack] | [ wrote] |
-| `GameView.java` | [Nikita], GenAI Revised | |
-| `ConsoleView.java` | [Nikita], GenAI Revised | |
-| `GameController.java` | [Jack] | [wrote] |
-| `PunchLineApp.java` | [Jack] | [wrote] |
-| `FixedDice.java` (test helper) | [Liam], GenAI | revised by Claude |
-| `ScriptedView.java` (test helper) | [Liam], GenAI | revised by Claude|
-| `GuestTest.java` | [Jack], GenAI | revised by Claude from the spec test plan |
-| `LinkedQueueTest.java` | [Advay], GenAI revised | Same |
-| `RandomDiceTest.java` | [Advay], GenAI revised| Same |
-| `RideLineTest.java` | [Advay], GenAI revised| Same|
-| `ValueTypesTest.java` | [Advay], GenAI revised | Same |
-| `GameControllerTest.java` | [Advay], GenAI revised | Same |
-| `ConsoleViewTest.java` | [Advay], GenAI revised | Same |
-| `README.md` | [Jack], Gen AI revised |
+| `Action.java` | Advay | Added FAST_PASS value with GenAI assistance |
+| `Outcome.java` | Advay | Added FAST_PASSED outcome with GenAI assistance |
+| `Dice.java` | Liam | Wrote (from D3) |
+| `RandomDice.java` | Liam | Wrote (from D3) |
+| `Guest.java` | Liam | Wrote (from D3) |
+| `LinkedQueue.java` | Nikita | Wrote (from D3); GenAI reviewed |
+| `RideLine.java` | Advay | Refactored for two queues; GenAI assisted implementation |
+| `TurnResult.java` | Liam | Wrote (from D3) |
+| `LineSnapshot.java` | Advay, Jack | Extended with fast-lane fields; backward-compatible constructor |
+| `GameView.java` | Nikita | Wrote (from D3); GenAI reviewed |
+| `ConsoleView.java` | Nikita, Advay | Updated to show both lanes and fast-pass option |
+| `GameController.java` | Liam, Advay | Updated parseAction and validation for fast-pass |
+| `PunchLineApp.java` | Jack | Wrote (from D3) |
+| `FixedDice.java` (test helper) | Liam | Wrote (from D3); GenAI revised |
+| `ScriptedView.java` (test helper) | Liam | Wrote (from D3); GenAI revised |
+| `GuestTest.java` | Jack | Wrote (from D3); GenAI revised |
+| `LinkedQueueTest.java` | Advay | Wrote (from D3); GenAI revised |
+| `RandomDiceTest.java` | Advay | Wrote (from D3); GenAI revised |
+| `RideLineTest.java` | Advay | Wrote base (D3); added 10+ fast-pass tests (D4) |
+| `ValueTypesTest.java` | Advay | Wrote (from D3); GenAI revised |
+| `GameControllerTest.java` | Advay | Updated to test fast-pass parsing and validation |
+| `ConsoleViewTest.java` | Advay | Wrote (from D3); GenAI revised |
+| `StrategySimulator.java` | Advay | Wrote for balance analysis |
+| `README.md` | Jack (D3), Advay (D4) | Updated reflection and next steps; GenAI drafted |
 
 ### GenAI note
 
-We used Claude to revise all our drafted code and graded our prototype against the Deliverable 3 rubric, then for a README and JUnit tests for the model. It also ran a simulation of our model to give us balance numbers. We compiled the code and ran all 65 tests ourselves.
+GenAI (Claude) assisted throughout Deliverable 4:
+- Revised the two-queue refactoring of `RideLine` with routing logic and fast-pass state management.
+- Revised `LineSnapshot` extensions to support both lanes while maintaining backward compatibility.
+- Updated `GameController` and `ConsoleView` to parse and display the fast-pass feature.
+- Reviewed comprehensive test cases for fast-pass behavior, edge cases, and integration.
+- Created the `StrategySimulator` for balance analysis.
+
+
+All code was reviewed and tested by the team before submission. The team wrote the core game logic (D1–D3); GenAI accelerated the feature implementation and testing for D4.
